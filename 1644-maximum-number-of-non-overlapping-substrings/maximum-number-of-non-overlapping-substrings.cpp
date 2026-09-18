@@ -1,101 +1,63 @@
+#include <bits/stdc++.h>
+using namespace std;
+
 class Solution {
-public:vector<int> vis;
-    stack<int> st;
-   void dfs(int u, vector<vector<int>>& adj) {
-        vis[u] = 1;
-        for (auto v : adj[u]) {
-            if (!vis[v]) {
-                dfs(v, adj);
-            }
-        }
-        st.push(u);
-    }
-     void dfs2(int u,vector<vector<int>>& rev,vector<int>& comp) {
-        vis[u] = 1;
-        comp.push_back(u);
-        for (auto v : rev[u]) {
-            if (!vis[v]) {
-                dfs2(v, rev, comp);
-            }
-        }
-    }
+public:
     vector<string> maxNumOfSubstrings(string s) {
-        int n = s.size();
-        vector<int> si(26, -1), ei(26, -1);
-        for (int i = 0; i < n; i++) {
-            int x = s[i] - 'a';
-            if (si[x] == -1) si[x] = i;
-            ei[x] = i; }
-        vector<vector<int>> pref(n + 1, vector<int>(26, 0));
-        for (int i = 0; i < n; i++) {
-            pref[i + 1] = pref[i];
-            pref[i + 1][s[i] - 'a']++;
+        int n = s.length();
+        vector<int> first(26, n);
+        vector<int> last(26, -1);
+
+        for (int i = 0; i < n; ++i) {
+            int c = s[i] - 'a';
+            first[c] = min(first[c], i);
+            last[c] = i;
         }
-        vector<vector<int>> adj(26);
-        for (int c = 0; c < 26; c++) {
-            if (si[c] == -1) continue;
-            int l = si[c];
-            int r = ei[c];
-            for (int ch = 0; ch < 26; ch++) {
-if(c==ch)continue;
-                int freq = pref[r + 1][ch] - pref[l][ch];
-                if (freq > 0) {
-                    adj[c].push_back(ch);
+
+        vector<pair<int, int>> intervals;
+
+        for (int i = 0; i < n; ++i) {
+            int c = s[i] - 'a';
+            if (i == first[c]) {
+                int right = last[c];
+                bool valid = true;
+                
+                for (int j = i; j <= right; ++j) {
+                    int curr_c = s[j] - 'a';
+                    if (first[curr_c] < i) {
+                        valid = false;
+                        break;
+                    }
+                    right = max(right, last[curr_c]);
+                }
+
+                if (valid) {
+                    intervals.push_back({i, right});
                 }
             }
         }
- vis.resize(26, 0);
-        for (int i = 0; i < 26; i++) {
-            if (si[i] != -1 && !vis[i]) {
-                dfs(i, adj); } }
-        
-           vector<vector<int>> rev(26);
-        for (int u = 0; u < 26; u++) {
-            for (auto v : adj[u]) {
-                rev[v].push_back(u);
+
+        auto cmp = [](const pair<int, int>& a, const pair<int, int>& b) {
+            if (a.second != b.second) {
+                return a.second < b.second;
             }
-        }
-         vis.assign(26, 0);
-        vector<vector<int>> scc;
-        while (!st.empty()) {
-            int node = st.top();
-            st.pop();
+            return (a.second - a.first) < (b.second - b.first);
+        };
+        sort(intervals.begin(), intervals.end(), cmp);
 
-            if (!vis[node]) {
+        vector<string> result;
+        int last_end = -1;
 
-                vector<int> comp;
+        for (auto& interval : intervals) {
+            int start = interval.first;
+            int end = interval.second;
 
-                dfs2(node, rev, comp);
-
-                scc.push_back(comp);
-            }
-        }
-vector<pair<int,int>> intervals;
-
-        for (auto &comp:scc) {
-            int l = n;
-            int r = -1;
-            for(auto ch:comp) {
-                l = min(l, si[ch]);
-                r = max(r, ei[ch]);
-            }
-
-            intervals.push_back({r, l});
-        }
-        sort(intervals.begin(), intervals.end());
-        vector<string> ans;
-        int last = -1;
-        for (auto &it : intervals) {
-            int r = it.first;
-            int l = it.second;
-            if(l>last) {
-                ans.push_back(s.substr(l, r - l + 1));
-                last = r;
+            if (start > last_end) {
+                result.push_back(s.substr(start, end - start + 1));
+                last_end = end;
             }
         }
 
-        return ans;
-
-
+        return result;
     }
 };
