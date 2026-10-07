@@ -4,7 +4,7 @@ public:
    
 unordered_map<int,unordered_map<string,int>>dp;
 
-    void dfs(string &s, int idx, string cur, int bal) {
+    void dfs(string &s, int idx, string &cur, int bal) {
 
         if (bal < 0) return;
 if(dp.find(idx)!=dp.end()&&dp[idx].find(cur)!=dp[idx].end()){
@@ -28,7 +28,9 @@ else if(ans.begin()->size()<cur.size()){
         char c = s[idx];
 
         if (c != '(' && c != ')') {
-            dfs(s, idx + 1, cur + c, bal);
+             cur.push_back(c);
+            dfs(s, idx + 1, cur , bal);
+             cur.pop_back();
             dp[idx][cur]=idx+1-cur.size();
             return;
         }
@@ -36,18 +38,21 @@ else if(ans.begin()->size()<cur.size()){
        
         dfs(s, idx + 1, cur, bal);
 
-      
+      cur.push_back(c);
         if (c == '(')
-            dfs(s, idx + 1, cur+c, bal + 1);
+            dfs(s, idx + 1, cur, bal + 1);
         else if(bal>0)
-            dfs(s, idx + 1, cur + c, bal - 1);
+            dfs(s, idx + 1, cur , bal - 1);
+            cur.pop_back();
                dp[idx][cur]=idx+1-cur.size();
+               
     }
 
     vector<string> removeInvalidParentheses(string s) {
         ans.clear();
         dp.clear();
-        dfs(s, 0, "", 0);
+        string cur="";
+        dfs(s, 0, cur, 0);
         return vector<string>(ans.begin(), ans.end());
     }
 };
