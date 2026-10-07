@@ -2,12 +2,12 @@ class Solution {
 public:
     set<string> ans;
    
-unordered_map<string,unordered_map<int,int>>dp;
+unordered_map<int,unordered_map<string,int>>dp;
 
     void dfs(string &s, int idx, string cur, int bal) {
 
         if (bal < 0) return;
-if(dp.find(cur)!=dp.end()&&dp[cur].find(idx)!=dp[cur].end()){
+if(dp.find(idx)!=dp.end()&&dp[idx].find(cur)!=dp[idx].end()){
     return;
 }
        
@@ -29,7 +29,7 @@ else if(ans.begin()->size()<cur.size()){
 
         if (c != '(' && c != ')') {
             dfs(s, idx + 1, cur + c, bal);
-            dp[cur][idx]=idx+1-cur.size();
+            dp[idx][cur]=idx+1-cur.size();
             return;
         }
 
@@ -41,7 +41,7 @@ else if(ans.begin()->size()<cur.size()){
             dfs(s, idx + 1, cur+c, bal + 1);
         else if(bal>0)
             dfs(s, idx + 1, cur + c, bal - 1);
-               dp[cur][idx]=idx+1-cur.size();
+               dp[idx][cur]=idx+1-cur.size();
     }
 
     vector<string> removeInvalidParentheses(string s) {
